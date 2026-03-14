@@ -22,6 +22,7 @@ import pydantic
 import pytest
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from pydantic.fields import FieldInfo
+import warnings
 
 from burr.core import expr
 from burr.core.action import (
@@ -133,6 +134,12 @@ def test_subset_model_copy_config():
     assert SubsetModel.__name__ == "MyModelWithConfigSubset"
     assert SubsetModel.model_config == {"arbitrary_types_allowed": True}
 
+def test_pydantic_version():
+    """Ensure pydantic >= 2.11 is installed (required for class-level model_fields access)."""
+    from packaging.version import Version
+    assert float(float(".".join(pydantic.__version__.split(".")[:2]))) >= float("2.11"), (
+        f"pydantic >= 2.11 required, got {pydantic.__version__}"
+    )
 
 def test_merge_to_state():
     model = OriginalModel(
