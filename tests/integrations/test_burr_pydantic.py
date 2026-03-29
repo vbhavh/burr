@@ -17,12 +17,12 @@
 
 import asyncio
 from typing import AsyncGenerator, Generator, List, Optional, Tuple
+import warnings
 
 import pydantic
 import pytest
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from pydantic.fields import FieldInfo
-import warnings
 
 from burr.core import expr
 from burr.core.action import (
@@ -134,12 +134,12 @@ def test_subset_model_copy_config():
     assert SubsetModel.__name__ == "MyModelWithConfigSubset"
     assert SubsetModel.model_config == {"arbitrary_types_allowed": True}
 
-def test_pydantic_version():
-    """Ensure pydantic >= 2.11 is installed (required for class-level model_fields access)."""
-    from packaging.version import Version
-    assert float(float(".".join(pydantic.__version__.split(".")[:2]))) >= float("2.11"), (
-        f"pydantic >= 2.11 required, got {pydantic.__version__}"
-    )
+def test_model_to_dict_no_deprecation_warning():
+    model = OriginalModel(foo=1, bar="bar", nested=NestedModel(nested_field1=1))
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        result = model_to_dict(model)
+    assert "foo" in result
 
 def test_merge_to_state():
     model = OriginalModel(

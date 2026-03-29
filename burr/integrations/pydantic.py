@@ -51,9 +51,8 @@ PydanticActionFunction = Callable[..., Union[pydantic.BaseModel, Awaitable[pydan
 
 def model_to_dict(model: pydantic.BaseModel, include: Optional[List[str]] = None) -> dict:
     """Utility function to convert a pydantic model to a dictionary."""
-    model_cls = model if isinstance(model, type) else type(model) # Handles the possibility that sometimes model is a class not instance
-    keys = model_cls.model_fields.keys()
-    keys = keys if include is None else [item for item in include if item in model_cls.model_fields]
+    keys = type(model).model_fields.keys()
+    keys = keys if include is None else [item for item in include if item in type(model).model_fields]
     return {key: getattr(model, key) for key in keys}
 
 
@@ -77,8 +76,7 @@ def subset_model(
     """
     new_fields = {}
 
-    model_cls = model if isinstance(model, type) else type(model) # Handles the possibility that sometimes model is a class not instance
-    for name, field_info in model_cls.model_fields.items():
+    for name, field_info in model.model_fields.items():
         if name in fields:
             # copy directly
             # TODO -- handle cross-field validation
@@ -116,8 +114,7 @@ def model_from_state(model: Type[ModelType], state: State) -> ModelType:
     :param state: state object to create from
     :return: model object
     """
-    model_cls = model if isinstance(model, type) else type(model) # Handles the possibility that sometimes model is a class not instance
-    keys = [item for item in model_cls.model_fields.keys() if item in state]
+    keys = [item for item in model.model_fields.keys() if item in state]
     return model(**{key: state[key] for key in keys})
 
 
@@ -156,8 +153,7 @@ def _validate_and_extract_signature_types(
 
 
 def _validate_keys(model: Type[pydantic.BaseModel], keys: List[str], fn: Callable) -> None:
-    model_cls = model if isinstance(model, type) else type(model)   # Handles the possibility that sometimes model is a class not instance
-    missing_keys = [key for key in keys if key not in model_cls.model_fields]
+    missing_keys = [key for key in keys if key not in model.model_fields]
     if missing_keys:
         raise ValueError(
             f"Function fn: {fn.__qualname__} is not a valid pydantic action. "
