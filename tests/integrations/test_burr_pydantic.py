@@ -16,8 +16,8 @@
 # under the License.
 
 import asyncio
-from typing import AsyncGenerator, Generator, List, Optional, Tuple
 import warnings
+from typing import AsyncGenerator, Generator, List, Optional, Tuple
 
 import pydantic
 import pytest
@@ -134,12 +134,14 @@ def test_subset_model_copy_config():
     assert SubsetModel.__name__ == "MyModelWithConfigSubset"
     assert SubsetModel.model_config == {"arbitrary_types_allowed": True}
 
+
 def test_model_to_dict_no_deprecation_warning():
     model = OriginalModel(foo=1, bar="bar", nested=NestedModel(nested_field1=1))
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         result = model_to_dict(model)
     assert "foo" in result
+
 
 def test_merge_to_state():
     model = OriginalModel(
